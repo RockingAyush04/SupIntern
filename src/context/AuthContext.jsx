@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { users as initialUsers } from "../data/users";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
@@ -10,6 +11,7 @@ export function useAuth() {
 export function AuthProvider({ children }) {
   const [users, setUsers] = useState(initialUsers);
   const [user, setUser] = useState(null);
+  const navigate=useNavigate();
 
   // Login
   const login = ({ email, password }) => {
@@ -44,7 +46,10 @@ export function AuthProvider({ children }) {
   };
 
   // Logout
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    navigate("/");
+  }
 
   // Admin: Approve user and assign role/supervisor
   const approveUser = (userId, role, supervisorId = null) => {

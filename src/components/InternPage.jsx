@@ -18,6 +18,7 @@ import {
 } from "@mui/joy";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { useAuth } from "../context/AuthContext";
 import { globalTasks } from "../data/tasks";
 
@@ -58,7 +59,8 @@ function InternPage() {
   const [refresh, setRefresh] = useState(0);
 
   const { minDate, maxDate } = getDateLimits();
-
+  const [deleteIndex, setDeleteIndex] = useState(null); // For which task to delete
+  const [deleteOpen, setDeleteOpen] = useState(false);  // Controls dialog visibility
   // Filter tasks for this intern
   const myTasks = globalTasks
     .filter((t) => t.userId === user.id)
@@ -126,6 +128,18 @@ function InternPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleDeleteTask = (index) => {
+    const toDelete = myTasks[index];
+    const globalIndex = globalTasks.findIndex(
+      (t) => t.userId === user.id && t.date === toDelete.date
+    );
+    if (globalIndex !== -1) {
+      globalTasks.splice(globalIndex, 1);
+      setRefresh((v) => v + 1);
+    }
+    setDeleteIndex(null); // Reset after delete
+  };
+
   return (
     <Sheet
       sx={{
@@ -163,6 +177,7 @@ function InternPage() {
               <th>Hours</th>
               <th>Description</th>
               <th>Edit</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -182,11 +197,45 @@ function InternPage() {
                     <EditIcon fontSize="small" />
                   </IconButton>
                 </td>
+                <td>
+                  <IconButton
+                    size="sm"
+                    variant="plain"
+                    color="danger"
+                    onClick={() => { setDeleteIndex(i); setDeleteOpen(true); }}
+                  >
+                    <DeleteIcon fontSize="small" />
+                  </IconButton>
+                </td>
               </tr>
             ))}
           </tbody>
         </Table>
       )}
+
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)}>
+      <ModalDialog variant="outlined" color="danger">
+        <DialogTitle>Delete Task?</DialogTitle>
+        <DialogContent>
+          Are you sure you want to delete this task? This action cannot be undone.
+        </DialogContent>
+        <DialogActions>
+          <Button variant="plain" onClick={() => setDeleteOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="solid"
+            color="danger"
+            onClick={() => {
+              if (deleteIndex !== null) handleDeleteTask(deleteIndex);
+              setDeleteOpen(false);
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </ModalDialog>
+    </Modal>
 
       <Modal open={open} onClose={() => setOpen(false)}>
         <ModalDialog>

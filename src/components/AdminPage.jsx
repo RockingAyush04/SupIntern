@@ -233,7 +233,7 @@ function AdminPage() {
                       <ul style={{ margin: 0, padding: 0, listStyle: "disc inside" }}>
                         {sup.interns.map((intern) => (
                           <li key={intern.id}>
-                            <Typography level="body-sm">{intern.name} ({intern.email})</Typography>
+                            <Typography level="body-sm" sx={{ display: "inline" }}>{intern.name} ({intern.email})</Typography>
                           </li>
                         ))}
                       </ul>

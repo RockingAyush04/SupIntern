@@ -7,15 +7,18 @@ import AdminPage from "./components/AdminPage";
 import SignupPage from "./components/SignupPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
+import HomePage from "./components/Homepage";
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Navbar />
+      
+        
         <Routes>
-          <Route path="/" element={<LoginPage />} />
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route element={<Navbar />} >
           <Route
             path="/intern"
             element={
@@ -40,8 +43,9 @@ function App() {
               </ProtectedRoute>
             }
           />
+          </Route>
         </Routes>
-      </BrowserRouter>
+      
     </AuthProvider>
   );
 }
