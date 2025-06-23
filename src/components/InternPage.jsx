@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   ModalDialog,
@@ -20,11 +20,10 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useAuth } from "../context/AuthContext";
-import { globalTasks } from "../data/tasks";
+import { Textarea } from "@mui/joy";
 
 // Utility: returns YYYY-MM-DD string
-const formatDate = (dateObj) =>
-  dateObj.toISOString().slice(0, 10);
+const formatDate = (dateObj) => dateObj.toISOString().slice(0, 10);
 
 function getDateLimits() {
   const today = new Date();
@@ -47,30 +46,37 @@ function isDateInRange(date, min, max) {
 }
 
 function InternPage() {
-  const { user } = useAuth();
+  const { user, getTasksForUser, addTask, editTask, deleteTask } = useAuth();
   const [open, setOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState(-1);
+  const [editingTask, setEditingTask] = useState(null);
   const [form, setForm] = useState({
     date: "",
     task: "",
     hours: "",
     description: "",
   });
-  const [refresh, setRefresh] = useState(0);
+  const [tasks, setTasks] = useState([]);
+  const [refresh, setRefresh] = useState(false);
 
   const { minDate, maxDate } = getDateLimits();
-  const [deleteIndex, setDeleteIndex] = useState(null); // For which task to delete
-  const [deleteOpen, setDeleteOpen] = useState(false);  // Controls dialog visibility
-  // Filter tasks for this intern
-  const myTasks = globalTasks
-    .filter((t) => t.userId === user.id)
-    .sort((a, b) => (a.date < b.date ? -1 : 1));
+  const [deleteTaskId, setDeleteTaskId] = useState(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
-  // Open dialog for add or edit
-  const handleOpen = (task, index) => {
+  useEffect(() => {
+    if (user) {
+      getTasksForUser(user.id).then(setTasks);
+    }
+  }, [user, refresh, getTasksForUser]);
+
+  const handleOpen = (task = null) => {
     if (task) {
-      setForm({ ...task });
-      setEditingIndex(index);
+      setForm({
+        date: task.date,
+        task: task.task,
+        hours: task.hours,
+        description: task.description || "",
+      });
+      setEditingTask(task);
     } else {
       setForm({
         date: "",
@@ -78,66 +84,54 @@ function InternPage() {
         hours: "",
         description: "",
       });
-      setEditingIndex(-1);
+      setEditingTask(null);
     }
     setOpen(true);
   };
 
-  // Save or update task
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!form.date || !form.task || !form.hours) return;
 
-    // Validate date range
     if (!isDateInRange(form.date, minDate, maxDate)) {
-      alert(
-        `Date must be between ${minDate} and ${maxDate}.`
-      );
+      alert(`Date must be between ${minDate} and ${maxDate}.`);
       return;
     }
 
-    if (editingIndex !== -1) {
-      // Find the global task index
-      const idx = globalTasks.findIndex(
-        (t) => t.userId === user.id && t.date === myTasks[editingIndex].date
-      );
-      if (idx !== -1) {
-        globalTasks[idx] = { ...form, hours: Number(form.hours), userId: user.id };
-      }
+    if (editingTask) {
+      await editTask(editingTask.id, {
+        date: form.date,
+        task: form.task,
+        hours: Number(form.hours),
+        description: form.description,
+      });
     } else {
       // Prevent duplicate date entries for this user in allowed range
-      const exists = globalTasks.some(
-        (t) => t.userId === user.id && t.date === form.date
-      );
-      if (exists) {
+      if (tasks.some((t) => t.date === form.date)) {
         alert("Task for this date already exists. Use edit.");
         return;
       }
-      globalTasks.push({
-        ...form,
-        hours: Number(form.hours),
+      await addTask({
         userId: user.id,
+        date: form.date,
+        task: form.task,
+        hours: Number(form.hours),
+        description: form.description,
       });
     }
     setOpen(false);
-    setRefresh((v) => v + 1); // Force re-render
+    setRefresh((v) => !v);
   };
 
-  // For controlled input changes
+  const handleDeleteTask = async () => {
+    await deleteTask(deleteTaskId);
+    setDeleteOpen(false);
+    setRefresh((v) => !v);
+    setDeleteTaskId(null);
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleDeleteTask = (index) => {
-    const toDelete = myTasks[index];
-    const globalIndex = globalTasks.findIndex(
-      (t) => t.userId === user.id && t.date === toDelete.date
-    );
-    if (globalIndex !== -1) {
-      globalTasks.splice(globalIndex, 1);
-      setRefresh((v) => v + 1);
-    }
-    setDeleteIndex(null); // Reset after delete
   };
 
   return (
@@ -152,24 +146,52 @@ function InternPage() {
         bgcolor: "background.body",
       }}
     >
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        mb={2}
+      >
         <Typography level="h3">Your Task Entries</Typography>
         <Tooltip title="Add Task">
-          <IconButton variant="soft" color="primary" onClick={() => handleOpen()}>
+          <IconButton
+            variant="soft"
+            color="primary"
+            onClick={() => handleOpen()}
+          >
             <AddIcon />
           </IconButton>
         </Tooltip>
       </Box>
-      {myTasks.length === 0 ? (
+      {tasks.length === 0 ? (
         <Typography level="body-md" color="neutral">
-          No tasks added yet. Click <AddIcon fontSize="small" /> to add your first task.
+          No tasks added yet. Click <AddIcon fontSize="small" /> to add your
+          first task.
         </Typography>
       ) : (
         <Table
           aria-label="task table"
           variant="soft"
-          sx={{ mt: 2, borderRadius: "md", overflow: "hidden" }}
+          sx={{
+            mt: 2,
+            borderRadius: "md",
+            overflow: "hidden",
+            tableLayout: "fixed",
+            "& th, & td": {
+              verticalAlign: "top",
+              wordBreak: "break-word",
+              whiteSpace: "pre-line",
+            },
+          }}
         >
+          <colgroup>
+            <col style={{ width: "110px" }} />
+            <col style={{ width: "120px" }} />
+            <col style={{ width: "70px" }} />
+            <col style={{ width: "230px" }} />
+            <col style={{ width: "50px" }} />
+            <col style={{ width: "60px" }} />
+          </colgroup>
           <thead>
             <tr>
               <th>Date</th>
@@ -181,18 +203,29 @@ function InternPage() {
             </tr>
           </thead>
           <tbody>
-            {myTasks.map((t, i) => (
-              <tr key={t.date}>
-                <td>{t.date}</td>
+            {tasks.map((t) => (
+              <tr key={t.id}>
+                <td>{t.date ? t.date.slice(0, 10) : ""}</td>
                 <td>{t.task}</td>
                 <td>{t.hours}</td>
-                <td>{t.description}</td>
+                <td>
+                  <Typography
+                    sx={{
+                      maxWidth: "220px",
+                      overflowWrap: "break-word",
+                      whiteSpace: "pre-line",
+                    }}
+                    level="body-sm"
+                  >
+                    {t.description}
+                  </Typography>
+                </td>
                 <td>
                   <IconButton
                     size="sm"
                     variant="plain"
                     color="neutral"
-                    onClick={() => handleOpen(t, i)}
+                    onClick={() => handleOpen(t)}
                   >
                     <EditIcon fontSize="small" />
                   </IconButton>
@@ -202,7 +235,10 @@ function InternPage() {
                     size="sm"
                     variant="plain"
                     color="danger"
-                    onClick={() => { setDeleteIndex(i); setDeleteOpen(true); }}
+                    onClick={() => {
+                      setDeleteTaskId(t.id);
+                      setDeleteOpen(true);
+                    }}
                   >
                     <DeleteIcon fontSize="small" />
                   </IconButton>
@@ -213,33 +249,29 @@ function InternPage() {
         </Table>
       )}
 
+      {/* Delete Modal */}
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-      <ModalDialog variant="outlined" color="danger">
-        <DialogTitle>Delete Task?</DialogTitle>
-        <DialogContent>
-          Are you sure you want to delete this task? This action cannot be undone.
-        </DialogContent>
-        <DialogActions>
-          <Button variant="plain" onClick={() => setDeleteOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="solid"
-            color="danger"
-            onClick={() => {
-              if (deleteIndex !== null) handleDeleteTask(deleteIndex);
-              setDeleteOpen(false);
-            }}
-          >
-            Delete
-          </Button>
-        </DialogActions>
-      </ModalDialog>
-    </Modal>
+        <ModalDialog variant="outlined" color="danger">
+          <DialogTitle>Delete Task?</DialogTitle>
+          <DialogContent>
+            Are you sure you want to delete this task? This action cannot be
+            undone.
+          </DialogContent>
+          <DialogActions>
+            <Button variant="plain" onClick={() => setDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="solid" color="danger" onClick={handleDeleteTask}>
+              Delete
+            </Button>
+          </DialogActions>
+        </ModalDialog>
+      </Modal>
 
+      {/* Add/Edit Modal */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <ModalDialog>
-          <DialogTitle>{editingIndex !== -1 ? "Edit Task" : "Add Task"}</DialogTitle>
+          <DialogTitle>{editingTask ? "Edit Task" : "Add Task"}</DialogTitle>
           <DialogContent>
             <form
               onSubmit={(e) => {
@@ -254,7 +286,7 @@ function InternPage() {
                   name="date"
                   value={form.date}
                   onChange={handleChange}
-                  disabled={editingIndex !== -1}
+                  disabled={!!editingTask}
                   required
                   min={minDate}
                   max={maxDate}
@@ -279,12 +311,13 @@ function InternPage() {
                   onChange={handleChange}
                   placeholder="Number of hours"
                   required
-                  inputProps={{ min: 1, max: 24 }}
+                  min={1}
+                  max={24}
                 />
               </FormControl>
               <FormControl sx={{ mb: 2 }}>
                 <FormLabel>Description (optional)</FormLabel>
-                <Input
+                <Textarea
                   name="description"
                   value={form.description}
                   onChange={handleChange}
@@ -293,11 +326,15 @@ function InternPage() {
                 />
               </FormControl>
               <DialogActions>
-                <Button type="button" variant="plain" onClick={() => setOpen(false)}>
+                <Button
+                  type="button"
+                  variant="plain"
+                  onClick={() => setOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" variant="solid">
-                  {editingIndex !== -1 ? "Update" : "Add"}
+                  {editingTask ? "Update" : "Add"}
                 </Button>
               </DialogActions>
             </form>

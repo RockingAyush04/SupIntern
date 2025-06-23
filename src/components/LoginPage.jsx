@@ -7,7 +7,6 @@ import IconButton from "@mui/joy/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import Alert from "@mui/joy/Alert";
 
-
 function LoginPage() {
   const {
     register,
@@ -34,9 +33,9 @@ function LoginPage() {
     }
   }, [user, navigate]);
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     setError("");
-    const success = login({ email: data.email, password: data.password });
+    const success = await login({ email: data.email, password: data.password });
     if (!success) setError("Invalid email or password.");
   };
 
@@ -53,13 +52,21 @@ function LoginPage() {
   if (user && !showSuccess) return <></>;
 
   return (
-    <div className="flex w-full h-screen flex-row">
-      <div className="flex-1 justify-center items-center bg-gradient-to-r from-purple-500 to-blue-500">
+    <div className="flex flex-row w-full h-screen">
+      <div className="flex-1 bg-gradient-to-r from-purple-500 to-blue-500">
         <p className="text-white font-medium m-4 text-2xl h-1/2">
-          Intern Task Tracker
+          SupIntern App
         </p>
       </div>
-      <div className="flex-1 flex items-center justify-center bg-gray-100">
+      <div
+        className="flex-1 flex items-center justify-center bg-gray-100"
+        style={{
+          backgroundImage:
+            "url('https://images.unsplash.com/photo-1516541196182-6bdb0516ed27?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8d2hpdGUlMjBiYWNrZ3JvdW5kfGVufDB8fDB8fHww')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
         <div className="bg-white p-10 rounded-xl shadow-lg w-full max-w-md">
           <h1 className="text-4xl font-bold mb-3">Welcome Back!</h1>
           <h2 className="text-xl font-medium mb-6">
@@ -125,16 +132,19 @@ function LoginPage() {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-0 top-0 h-full px-4 bg-transparent text-gray-700"
+                  tabIndex={-1}
                 >
                   {showPassword ? (
                     <img
                       src="https://static.thenounproject.com/png/1069529-200.png"
                       className="w-5 h-5"
+                      alt="Hide"
                     />
                   ) : (
                     <img
                       src="https://static.thenounproject.com/png/1069530-200.png"
                       className="w-5 h-5"
+                      alt="Show"
                     />
                   )}
                 </button>
@@ -145,10 +155,6 @@ function LoginPage() {
                 </p>
               )}
             </div>
-            {/* <div className='flex justify-end'>
-              <button className="text-purple-600 font-medium mb-6 cursor-pointer" onClick={forgotPassword}>Forgot Password</button>
-            </div>
-            {error && <div className="text-red-600 mb-2">{error}</div>} */}
             <Snackbar
               open={!!error}
               onClose={() => setError("")}
@@ -159,18 +165,16 @@ function LoginPage() {
                 variant="outlined"
                 color="danger"
                 sx={{
-                  
-                    backgroundColor: "white",
-                    borderColor: "red",
-                    borderWidth: 1,
-                    borderStyle: "solid",
-                    minWidth: 350,
-                    height: 40,
-                    px: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                  
+                  backgroundColor: "white",
+                  borderColor: "red",
+                  borderWidth: 1,
+                  borderStyle: "solid",
+                  minWidth: 350,
+                  height: 40,
+                  px: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
                 }}
                 endDecorator={
                   <IconButton
@@ -203,7 +207,6 @@ function LoginPage() {
                 Sign up
               </button>
             </div>
-           
           </form>
         </div>
       </div>
@@ -219,4 +222,5 @@ function LoginPage() {
     </div>
   );
 }
+
 export default LoginPage;

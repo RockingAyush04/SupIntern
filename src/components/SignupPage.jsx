@@ -148,7 +148,6 @@ function SignupPage() {
               )}
             </div>
 
-            {/* {message && <div className="mt-4 text-green-700">{message}</div>} */}
             <Snackbar
               open={!!message}
               onClose={() => setMessage("")}

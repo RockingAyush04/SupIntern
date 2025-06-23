@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Sheet,
   Typography,
@@ -7,9 +7,6 @@ import {
   IconButton,
   Tooltip,
   Button,
-  Input,
-  FormControl,
-  FormLabel,
   Divider,
   List,
   ListItem,
@@ -35,24 +32,48 @@ function AdminPage() {
     getPendingUsers,
     approveUser,
     getSupervisors,
-    getSupervisorsWithInterns,
+    getAllUsers,
   } = useAuth();
 
   const [pendingRole, setPendingRole] = useState({});
   const [pendingSupervisor, setPendingSupervisor] = useState({});
   const [approveDialog, setApproveDialog] = useState({ open: false, user: null });
 
-  const pendingUsers = getPendingUsers();
-  const supervisors = getSupervisors();
-  const supervisorsWithInterns = getSupervisorsWithInterns();
+  // Fetched data state
+  const [pendingUsers, setPendingUsers] = useState([]);
+  const [supervisors, setSupervisors] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
-  const handleApprove = (userId) => {
+  // Fetch data on mount and after any approval
+  const fetchData = async () => {
+    setPendingUsers(await getPendingUsers());
+    setSupervisors(await getSupervisors());
+    setAllUsers(await getAllUsers());
+  };
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line
+  }, []);
+
+  const handleApprove = async (userId) => {
     const role = pendingRole[userId];
     if (!role) return;
     const supervisorId = role === "intern" ? pendingSupervisor[userId] : null;
-    approveUser(userId, role, supervisorId);
+    await approveUser(userId, role, supervisorId);
     setApproveDialog({ open: false, user: null });
+    setPendingRole((prev) => ({ ...prev, [userId]: undefined }));
+    setPendingSupervisor((prev) => ({ ...prev, [userId]: undefined }));
+    fetchData(); // Refresh
   };
+
+  // Build supervisor-interns list
+  const supervisorsWithInterns = supervisors.map((sup) => ({
+    ...sup,
+    interns: allUsers.filter(
+      (u) => u.role === "intern" && String(u.supervisor_id) === String(sup.id) && u.status === "active"
+    ),
+  }));
 
   return (
     <Sheet

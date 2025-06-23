@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Sheet,
   Typography,
@@ -22,8 +22,8 @@ import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CloseIcon from "@mui/icons-material/Close";
 import { useAuth } from "../context/AuthContext";
-import { globalTasks } from "../data/tasks";
 
+// Download tasks as CSV
 function downloadCSV(intern, tasks) {
   if (!tasks.length) return;
   const rows = [
@@ -40,23 +40,72 @@ function downloadCSV(intern, tasks) {
   URL.revokeObjectURL(url);
 }
 
+// Utility to truncate description to at most 2 lines and add ...
+function truncateDescription(description, maxLines = 2, maxCharsPerLine = 60) {
+  if (!description) return "";
+  // Split by lines then join up to maxLines
+  const lines = description.split('\n');
+  let result = [];
+  let charCount = 0;
+  for (let i = 0; i < lines.length && result.length < maxLines; i++) {
+    let line = lines[i];
+    // If a single line is too long, break it up
+    while (line.length > maxCharsPerLine) {
+      result.push(line.slice(0, maxCharsPerLine));
+      line = line.slice(maxCharsPerLine);
+      if (result.length === maxLines) break;
+    }
+    if (result.length < maxLines) result.push(line);
+  }
+  let joined = result.join('\n');
+  // If there's more content, add ellipsis
+  if (lines.length > maxLines || description.length > joined.length) {
+    joined = joined.trimEnd();
+    if (!joined.endsWith('...')) joined += '...';
+  }
+  return joined;
+}
+
 function SupervisorPage() {
-  const { user, getInternsOfSupervisor } = useAuth();
+  const { user, getInternsOfSupervisor, getTasksForUser } = useAuth();
+  const [interns, setInterns] = useState([]);
+  const [taskCounts, setTaskCounts] = useState({});
   const [selectedIntern, setSelectedIntern] = useState(null);
+  const [selectedInternTasks, setSelectedInternTasks] = useState([]);
   const [open, setOpen] = useState(false);
 
-  const myInterns = getInternsOfSupervisor(user.id);
+  useEffect(() => {
+    async function fetchData() {
+      const interns = await getInternsOfSupervisor(user.id);
+      setInterns(interns);
 
-  // Intern tasks sorted by date ascending
-  const internTasks = (intern) =>
-    globalTasks
-      .filter((t) => t.userId === intern.id)
-      .sort((a, b) => (a.date < b.date ? -1 : 1));
+      // Fetch task counts for each intern
+      const counts = {};
+      for (const intern of interns) {
+        const tasks = await getTasksForUser(intern.id);
+        counts[intern.id] = tasks.length;
+      }
+      setTaskCounts(counts);
+    }
+    if (user) fetchData();
+  }, [user, getInternsOfSupervisor, getTasksForUser]);
 
-  const handleViewIntern = (intern) => {
+  const handleViewIntern = async (intern) => {
     setSelectedIntern(intern);
+    const data = await getTasksForUser(intern.id);
+    setSelectedInternTasks(data);
     setOpen(true);
   };
+
+  // Format date to YYYY-MM-DD
+  const formatDate = (dateStr) =>
+    dateStr
+      ? typeof dateStr === "string"
+        ? dateStr.slice(0, 10)
+        : dateStr instanceof Date
+        ? dateStr.toISOString().slice(0, 10)
+        : ""
+      : "";
 
   return (
     <Sheet
@@ -78,7 +127,7 @@ function SupervisorPage() {
       <Typography level="h4" sx={{ mb: 2 }}>
         Your Interns
       </Typography>
-      {myInterns.length === 0 ? (
+      {interns.length === 0 ? (
         <Typography color="neutral">
           You have no interns assigned.
         </Typography>
@@ -93,7 +142,7 @@ function SupervisorPage() {
             mb: 2,
           }}
         >
-          {myInterns.map((intern) => (
+          {interns.map((intern) => (
             <ListItem
               key={intern.id}
               sx={{
@@ -113,7 +162,11 @@ function SupervisorPage() {
                     {intern.email}
                   </Typography>
                   <Chip size="sm" variant="soft" color="primary" sx={{ mt: 0.5 }}>
-                    {internTasks(intern).length} task{internTasks(intern).length !== 1 ? "s" : ""}
+                    {taskCounts[intern.id] !== undefined
+                      ? `${taskCounts[intern.id]} ${
+                          taskCounts[intern.id] === 1 ? "Task" : "Tasks"
+                        }`
+                      : "Tasks"}
                   </Chip>
                 </Box>
               </ListItemContent>
@@ -125,15 +178,6 @@ function SupervisorPage() {
                   onClick={() => handleViewIntern(intern)}
                 >
                   <VisibilityIcon />
-                </IconButton>
-              </Tooltip>
-              <Tooltip title="Download as CSV" variant="outlined">
-                <IconButton
-                  color="success"
-                  variant="soft"
-                  onClick={() => downloadCSV(intern, internTasks(intern))}
-                >
-                  <DownloadIcon />
                 </IconButton>
               </Tooltip>
             </ListItem>
@@ -154,12 +198,12 @@ function SupervisorPage() {
             )}
           </DialogTitle>
           <DialogContent>
-            {selectedIntern && internTasks(selectedIntern).length === 0 && (
+            {selectedIntern && selectedInternTasks.length === 0 && (
               <Typography color="neutral">
                 No tasks found for this intern.
               </Typography>
             )}
-            {selectedIntern && internTasks(selectedIntern).length > 0 && (
+            {selectedIntern && selectedInternTasks.length > 0 && (
               <Table
                 aria-label="Intern task table"
                 size="sm"
@@ -175,10 +219,12 @@ function SupervisorPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {internTasks(selectedIntern).map((task) => (
-                    <tr key={task.date}>
+                  {selectedInternTasks.map((task) => (
+                    <tr key={task.id}>
                       <td>
-                        <Typography level="body-md">{task.date}</Typography>
+                        <Typography level="body-md">
+                          {formatDate(task.date)}
+                        </Typography>
                       </td>
                       <td>
                         <Typography level="body-md">{task.task}</Typography>
@@ -187,8 +233,20 @@ function SupervisorPage() {
                         <Typography level="body-md">{task.hours}</Typography>
                       </td>
                       <td>
-                        <Typography level="body-sm" color="neutral">
-                          {task.description || <i>No description</i>}
+                        <Typography
+                          level="body-sm"
+                          color="neutral"
+                          sx={{
+                            display: "-webkit-box",
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "pre-line",
+                            maxWidth: 260,
+                          }}
+                        >
+                          {truncateDescription(task.description)}
                         </Typography>
                       </td>
                     </tr>
@@ -206,12 +264,12 @@ function SupervisorPage() {
             >
               Close
             </Button>
-            {selectedIntern && internTasks(selectedIntern).length > 0 && (
+            {selectedIntern && selectedInternTasks.length > 0 && (
               <Button
                 startDecorator={<DownloadIcon />}
                 color="primary"
                 variant="solid"
-                onClick={() => downloadCSV(selectedIntern, internTasks(selectedIntern))}
+                onClick={() => downloadCSV(selectedIntern, selectedInternTasks)}
               >
                 Download CSV
               </Button>

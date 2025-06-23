@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState } from "react";
-import { users as initialUsers } from "../data/users";
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
@@ -9,80 +8,117 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [users, setUsers] = useState(initialUsers);
   const [user, setUser] = useState(null);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
-  // Login
-  const login = ({ email, password }) => {
-    const foundUser = users.find(
-      (u) => u.email === email && u.password === password && u.status === "active"
-    );
-    if (foundUser) {
-      setUser(foundUser);
-      return true;
-    } else {
+  // Login using backend API
+  const login = async ({ email, password }) => {
+    try {
+      const response = await fetch("http://localhost:4000/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setUser(data.user);
+        return true;
+      }
+      setUser(null);
+      return false;
+    } catch (err) {
       setUser(null);
       return false;
     }
   };
 
-  // Signup (pending status)
-  const signup = ({ email, password, name }) => {
-    if (users.some((u) => u.email === email)) {
-      return { success: false, message: "Email already registered." };
+  // Signup using backend API
+  const signup = async ({ name, email, password }) => {
+    try {
+      const response = await fetch("http://localhost:4000/api/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      return { success: false, message: "Signup failed. Please try again." };
     }
-    const newUser = {
-      id: Date.now(),
-      email,
-      password,
-      name,
-      role: null,
-      status: "pending",
-      supervisorId: null,
-    };
-    setUsers((prev) => [...prev, newUser]);
-    return { success: true };
   };
 
   // Logout
   const logout = () => {
     setUser(null);
     navigate("/");
-  }
-
-  // Admin: Approve user and assign role/supervisor
-  const approveUser = (userId, role, supervisorId = null) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === userId
-          ? {
-              ...u,
-              role,
-              status: "active",
-              supervisorId: role === "intern" ? supervisorId : null,
-            }
-          : u
-      )
-    );
   };
 
-  // Admin: Pending users
-  const getPendingUsers = () => users.filter((u) => u.status === "pending");
+  // Fetch all pending users
+  const getPendingUsers = async () => {
+    const response = await fetch("http://localhost:4000/api/users/pending");
+    return await response.json();
+  };
 
-  // Admin: Supervisors
-  const getSupervisors = () => users.filter((u) => u.role === "supervisor");
+  // Approve a user
+  const approveUser = async (userId, role, supervisorId = null) => {
+    const response = await fetch("http://localhost:4000/api/users/approve", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, role, supervisorId }),
+    });
+    const data = await response.json();
+    return data.success;
+  };
 
-  // Admin: Interns of supervisor
-  const getInternsOfSupervisor = (supervisorId) =>
-    users.filter((u) => u.role === "intern" && u.supervisorId === supervisorId);
+  // Fetch all supervisors
+  const getSupervisors = async () => {
+    const response = await fetch("http://localhost:4000/api/users/supervisors");
+    return await response.json();
+  };
 
-  // Admin: Supervisor with interns
-  const getSupervisorsWithInterns = () =>
-    getSupervisors().map((sup) => ({
-      ...sup,
-      interns: getInternsOfSupervisor(sup.id),
-    }));
+  // Fetch all interns of a supervisor
+  const getInternsOfSupervisor = async (supervisorId) => {
+    const response = await fetch(`http://localhost:4000/api/users/interns/${supervisorId}`);
+    return await response.json();
+  };
+
+  // Fetch all users (optional for admin listing)
+  const getAllUsers = async () => {
+    const response = await fetch("http://localhost:4000/api/users/all");
+    return await response.json();
+  };
+
+  const getTasksForUser = async (userId) => {
+    const response = await fetch(`http://localhost:4000/api/tasks/user/${userId}`);
+    return await response.json();
+  };
+
+  const addTask = async (task) => {
+    const response = await fetch("http://localhost:4000/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(task),
+    });
+    return await response.json();
+  };
+
+  const editTask = async (taskId, task) => {
+    const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(task),
+    });
+    return await response.json();
+  };
+
+  const deleteTask = async (taskId) => {
+    const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+      method: "DELETE",
+    });
+    return await response.json();
+  };
+
+  
 
   return (
     <AuthContext.Provider
@@ -91,13 +127,16 @@ export function AuthProvider({ children }) {
         login,
         logout,
         signup,
-        users,
-        approveUser,
         getPendingUsers,
+        approveUser,
         getSupervisors,
         getInternsOfSupervisor,
-        getSupervisorsWithInterns,
-        setUsers,
+        getAllUsers,
+        setUser,
+        addTask,
+        getTasksForUser,
+        editTask,
+        deleteTask,
       }}
     >
       {children}
