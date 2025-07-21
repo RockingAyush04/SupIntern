@@ -71,7 +71,7 @@ function InternPage() {
   const handleOpen = (task = null) => {
     if (task) {
       setForm({
-        date: task.date,
+        date: task.date ? task.date.slice(0, 10) : "",
         task: task.task,
         hours: task.hours,
         description: task.description || "",

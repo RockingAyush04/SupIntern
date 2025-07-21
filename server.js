@@ -197,10 +197,10 @@ app.use(express.json());
 
 console.log({
   database_url: process.env.DATABASE_URL,
-  // For debugging purposes only. Do not log sensitive data in production.
+  
 });
 
-// --- Neon/Cloud PostgreSQL pool setup ---
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },

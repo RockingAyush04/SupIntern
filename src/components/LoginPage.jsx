@@ -38,7 +38,10 @@ function LoginPage() {
     const success = await login({ email: data.email, password: data.password });
     if (!success) setError("Invalid email or password.");
   };
-
+  function signin(e){
+    e.preventDefault();
+    navigate("/signin");
+  }
   function signUp(e) {
     e.preventDefault();
     navigate("/signup");
