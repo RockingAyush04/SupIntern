@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Sheet,
   Typography,
@@ -10,7 +11,6 @@ import {
   Divider,
   List,
   ListItem,
-  ListItemContent,
   Select,
   Option,
   Chip,
@@ -25,6 +25,7 @@ import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import PeopleIcon from "@mui/icons-material/People";
 import CloseIcon from "@mui/icons-material/Close";
+
 import { useAuth } from "../context/AuthContext";
 
 function AdminPage() {
@@ -33,7 +34,9 @@ function AdminPage() {
     approveUser,
     getSupervisors,
     getAllUsers,
+    logout,
   } = useAuth();
+  const navigate = useNavigate();
 
   const [pendingRole, setPendingRole] = useState({});
   const [pendingSupervisor, setPendingSupervisor] = useState({});
@@ -67,6 +70,8 @@ function AdminPage() {
     fetchData(); // Refresh
   };
 
+
+
   // Build supervisor-interns list
   const supervisorsWithInterns = supervisors.map((sup) => ({
     ...sup,
@@ -78,237 +83,291 @@ function AdminPage() {
   return (
     <Sheet
       sx={{
-        maxWidth: 950,
-        mx: "auto",
-        my: 6,
-        p: 4,
-        borderRadius: "lg",
-        boxShadow: "lg",
-        bgcolor: "background.body",
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #09090b 0%, #1a1a2e 50%, #2e1065 100%)",
+        color: "#fff",
+        py: 4,
+        px: { xs: 2, md: 6 },
       }}
     >
-      <Typography level="h2" fontWeight="lg" sx={{ mb: 2 }}>
-        Admin Dashboard
-      </Typography>
-      <Divider sx={{ mb: 3 }} />
-
-      <Box sx={{ mb: 6 }}>
-        <Typography level="h4" sx={{ mb: 2 }}>
-          <PersonAddAlt1Icon sx={{ mr: 1 }} />
-          Pending User Approvals
-        </Typography>
-        {pendingUsers.length === 0 ? (
-          <Typography color="neutral" sx={{ mb: 2 }}>
-            No pending users!
+      <Box sx={{ maxWidth: 1200, mx: "auto" }}>
+        {/* Header */}
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 4 }}>
+          <Typography level="h2" sx={{ color: "#fff", fontWeight: 700 }}>
+            Admin Dashboard
           </Typography>
-        ) : (
-          <Table
-            aria-label="pending users table"
-            variant="soft"
-            size="md"
-            sx={{
-              borderRadius: "md",
-              overflow: "hidden",
-              bgcolor: "background.level1",
-              mb: 2,
-            }}
-          >
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Assign Role</th>
-                <th>Assign Supervisor</th>
-                <th>Approve</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingUsers.map((u) => (
-                <tr key={u._id}>
-                  <td>
-                    <Typography fontWeight="md">{u.name}</Typography>
-                  </td>
-                  <td>{u.email}</td>
-                  <td>
-                    <Select
-                      size="sm"
-                      placeholder="Role"
-                      value={pendingRole[u._id] || ""}
-                      onChange={(_, value) =>
-                        setPendingRole((prev) => ({ ...prev, [u._id]: value }))
-                      }
-                      sx={{ minWidth: 120 }}
-                    >
-                      <Option value="intern">Intern</Option>
-                      <Option value="supervisor">Supervisor</Option>
-                    </Select>
-                  </td>
-                  <td>
-                    {pendingRole[u._id] === "intern" ? (
+
+        </Box>
+
+        <Divider sx={{ mb: 6, bgcolor: "rgba(255,255,255,0.1)" }} />
+
+        {/* Pending Approvals Section */}
+        <Box
+          sx={{
+            mb: 6,
+            p: 3,
+            bgcolor: "rgba(255,255,255,0.03)",
+            backdropFilter: "blur(10px)",
+            borderRadius: "xl",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <Typography level="h4" sx={{ mb: 2, color: "#fff", display: "flex", alignItems: "center", gap: 1 }}>
+            <PersonAddAlt1Icon sx={{ color: "#fbbf24" }} />
+            Pending User Approvals
+          </Typography>
+
+          {pendingUsers.length === 0 ? (
+            <Typography sx={{ color: "#94a3b8" }}>No pending users!</Typography>
+          ) : (
+            <Table
+              aria-label="pending users table"
+              sx={{
+                "--TableCell-headBackground": "transparent",
+                "--TableCell-selectedBackground": "rgba(255,255,255,0.05)",
+                "& thead th": { color: "#94a3b8", borderBottom: "1px solid rgba(255,255,255,0.1)" },
+                "& tbody td": { color: "#e2e8f0", borderBottom: "1px solid rgba(255,255,255,0.05)" },
+                "& tbody tr:last-child td": { borderBottom: "none" },
+                "& tbody tr": {
+                   transition: "background-color 0.2s",
+                   "&:hover": { bgcolor: "rgba(255,255,255,0.04)" }
+                }
+              }}
+            >
+              <thead>
+                <tr>
+                  <th style={{ width: "20%" }}>Name</th>
+                  <th style={{ width: "25%" }}>Email</th>
+                  <th style={{ width: "20%" }}>Assign Role</th>
+                  <th style={{ width: "25%" }}>Assign Supervisor</th>
+                  <th style={{ width: "10%" }}>Approve</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingUsers.map((u) => (
+                  <tr key={u._id}>
+                    <td>
+                      <Typography fontWeight="lg" sx={{ color: "#fff" }}>{u.name}</Typography>
+                    </td>
+                    <td>{u.email}</td>
+                    <td>
                       <Select
                         size="sm"
-                        placeholder="Supervisor"
-                        value={pendingSupervisor[u._id] || ""}
-                        onChange={(_, value) =>
-                          setPendingSupervisor((prev) => ({
-                            ...prev,
-                            [u._id]: value,
-                          }))
-                        }
-                        sx={{ minWidth: 160 }}
+                        placeholder="Role"
+                        variant="outlined"
+                        value={pendingRole[u._id] || ""}
+                        onChange={(_, value) => setPendingRole((prev) => ({ ...prev, [u._id]: value }))}
+                        slotProps={{
+                          listbox: {
+                            sx: {
+                              bgcolor: "#18181b", // Dark background for the dropdown menu
+                              borderColor: "rgba(255,255,255,0.1)",
+                              "& .MuiOption-root": {
+                                color: "#e2e8f0",
+                                "&:hover": {
+                                  bgcolor: "rgba(167, 139, 250, 0.15)", // Purple tint on hover
+                                  color: "#fff",
+                                },
+                                "&[aria-selected='true']": {
+                                  bgcolor: "rgba(167, 139, 250, 0.25)",
+                                  color: "#fff",
+                                },
+                              },
+                            },
+                          },
+                        }}
+                        sx={{
+                          bgcolor: "rgba(0,0,0,0.2)",
+                          color: "#fff",
+                          borderColor: "rgba(255,255,255,0.2)",
+                          "&:hover": { borderColor: "#a78bfa", bgcolor: "rgba(255,255,255,0.05)" },
+                        }}
                       >
-                        {supervisors.length === 0 ? (
-                          <Option disabled>No supervisors</Option>
-                        ) : (
-                          supervisors.map((sup) => (
-                            <Option key={sup._id} value={sup._id}>
-                              {sup.name} ({sup.email})
-                            </Option>
-                          ))
-                        )}
+                        <Option value="intern">Intern</Option>
+                        <Option value="supervisor">Supervisor</Option>
                       </Select>
-                    ) : (
-                      <Typography level="body-sm" color="neutral" sx={{ pl: 1 }}>
-                        —
-                      </Typography>
-                    )}
-                  </td>
-                  <td>
-                    <Tooltip title="Approve User">
-                      <span>
+                    </td>
+                    <td>
+                      {pendingRole[u._id] === "intern" ? (
+                        <Select
+                          size="sm"
+                          placeholder="Supervisor"
+                          variant="outlined"
+                          value={pendingSupervisor[u._id] || ""}
+                          onChange={(_, value) => setPendingSupervisor((prev) => ({ ...prev, [u._id]: value }))}
+                          slotProps={{
+                            listbox: {
+                              sx: {
+                                bgcolor: "#18181b",
+                                borderColor: "rgba(255,255,255,0.1)",
+                                "& .MuiOption-root": {
+                                  color: "#e2e8f0",
+                                  "&:hover": {
+                                    bgcolor: "rgba(167, 139, 250, 0.15)",
+                                    color: "#fff",
+                                  },
+                                  "&[aria-selected='true']": {
+                                    bgcolor: "rgba(167, 139, 250, 0.25)",
+                                    color: "#fff",
+                                  },
+                                },
+                              },
+                            },
+                          }}
+                          sx={{
+                            bgcolor: "rgba(0,0,0,0.2)",
+                            color: "#fff",
+                            borderColor: "rgba(255,255,255,0.2)",
+                            "&:hover": { borderColor: "#a78bfa", bgcolor: "rgba(255,255,255,0.05)" },
+                          }}
+                        >
+                          {supervisors.length === 0 ? (
+                            <Option disabled>No supervisors</Option>
+                          ) : (
+                            supervisors.map((sup) => (
+                              <Option key={sup._id} value={sup._id}>
+                                {sup.name}
+                              </Option>
+                            ))
+                          )}
+                        </Select>
+                      ) : (
+                        <Typography level="body-sm" sx={{ color: "#64748b", pl: 1 }}>—</Typography>
+                      )}
+                    </td>
+                    <td>
+                      <Tooltip title="Approve User" variant="solid">
                         <IconButton
                           size="sm"
+                          variant="solid"
                           color="success"
-                          variant="soft"
-                          disabled={
-                            !pendingRole[u._id] ||
-                            (pendingRole[u._id] === "intern" && !pendingSupervisor[u._id])
-                          }
+                          disabled={!pendingRole[u._id] || (pendingRole[u._id] === "intern" && !pendingSupervisor[u._id])}
                           onClick={() => setApproveDialog({ open: true, user: u })}
+                          sx={{ bgcolor: "#22c55e", color: "#fff", "&:hover": { bgcolor: "#16a34a" }, "&:disabled": { bgcolor: "rgba(255,255,255,0.1)", color: "rgba(255,255,255,0.3)" } }}
                         >
                           <CheckCircleIcon />
                         </IconButton>
-                      </span>
-                    </Tooltip>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
-      </Box>
+                      </Tooltip>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Box>
 
-      <Box>
-        <Typography level="h4" sx={{ mb: 2 }}>
-          <PeopleIcon sx={{ mr: 1 }} />
-          Supervisors and Assigned Interns
-        </Typography>
-        {supervisorsWithInterns.length === 0 ? (
-          <Typography color="neutral">
-            No supervisors found.
+        {/* Supervisors List Section */}
+        <Box
+          sx={{
+            p: 3,
+            bgcolor: "rgba(255,255,255,0.03)",
+            backdropFilter: "blur(10px)",
+            borderRadius: "xl",
+            border: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <Typography level="h4" sx={{ mb: 2, color: "#fff", display: "flex", alignItems: "center", gap: 1 }}>
+            <PeopleIcon sx={{ color: "#a78bfa" }} />
+            Supervisors and Assigned Interns
           </Typography>
-        ) : (
-          <List
-            sx={{
-              "--ListItem-paddingY": "1.2rem",
-              "--ListItem-paddingX": "1rem",
-              border: "1px solid var(--joy-palette-neutral-200, #e0e0e0)",
-              borderRadius: "lg",
-              bgcolor: "background.level1",
-              mb: 2,
-            }}
-          >
-            {supervisorsWithInterns.map((sup) => (
-              <ListItem
-                key={sup._id}
-                sx={{
-                  display: "flex",
-                  alignItems: "flex-start",
-                  justifyContent: "space-between",
-                  borderBottom: "1px solid var(--joy-palette-neutral-200, #f0f0f0)",
-                  "&:last-child": { borderBottom: "none" },
-                }}
-              >
-                <ListItemContent>
-                  <Typography fontWeight="md" fontSize="lg">
-                    <SupervisorAccountIcon sx={{ mr: 1, mb: "-4px" }} />
-                    {sup.name}
-                  </Typography>
-                  <Typography color="neutral" level="body-sm">
-                    {sup.email}
-                  </Typography>
-                  <Chip
-                    size="sm"
-                    variant="soft"
-                    color="primary"
-                    sx={{ mt: 0.5 }}
-                  >
-                    {sup.interns.length} intern{sup.interns.length !== 1 ? "s" : ""}
-                  </Chip>
-                  <Box sx={{ mt: 1, ml: 2 }}>
+
+          {supervisorsWithInterns.length === 0 ? (
+            <Typography sx={{ color: "#94a3b8" }}>No supervisors found.</Typography>
+          ) : (
+            <List sx={{ "--ListItem-paddingY": "1rem", "--ListItem-paddingX": "0" }}>
+              {supervisorsWithInterns.map((sup) => (
+                <ListItem
+                  key={sup._id}
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    borderBottom: "1px solid rgba(255,255,255,0.1)",
+                    "&:last-child": { borderBottom: "none" },
+                    py: 2,
+                    px: 2,
+                    borderRadius: "md",
+                    transition: "background-color 0.2s",
+                    "&:hover": { bgcolor: "rgba(255,255,255,0.03)" }
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between", mb: 2 }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Box sx={{ p: 1, bgcolor: "rgba(52, 211, 153, 0.1)", borderRadius: "50%" }}>
+                          <SupervisorAccountIcon sx={{ color: "#34d399", fontSize: 28 }} />
+                      </Box>
+                      <Box>
+                        <Typography fontWeight="lg" sx={{ color: "#fff", fontSize: "1.1rem" }}>{sup.name}</Typography>
+                        <Typography level="body-sm" sx={{ color: "#94a3b8" }}>{sup.email}</Typography>
+                      </Box>
+                    </Box>
+                    <Chip size="sm" variant="soft" color="primary" sx={{ bgcolor: "rgba(139, 92, 246, 0.2)", color: "#c4b5fd" }}>
+                      {sup.interns.length} Active Intern{sup.interns.length !== 1 ? "s" : ""}
+                    </Chip>
+                  </Box>
+
+                  <Box sx={{ width: "100%", pl: { xs: 0, md: 7 } }}>
                     {sup.interns.length === 0 ? (
-                      <Typography color="neutral" level="body-xs">
-                        No interns assigned.
+                      <Typography level="body-xs" sx={{ color: "#64748b", fontStyle: "italic" }}>
+                        No active interns assigned.
                       </Typography>
                     ) : (
-                      <ul style={{ margin: 0, padding: 0, listStyle: "disc inside" }}>
-                        {sup.interns.map((intern) => (
-                          <li key={intern._id}>
-                            <Typography level="body-sm" sx={{ display: "inline" }}>{intern.name} ({intern.email})</Typography>
-                          </li>
-                        ))}
-                      </ul>
+                      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+                         {sup.interns.map((intern) => (
+                            <Tooltip key={intern._id} title={intern.email} variant="soft" placement="top">
+                                <Chip
+                                  variant="soft"
+                                  size="md"
+                                  sx={{
+                                      bgcolor: "rgba(255,255,255,0.08)",
+                                      color: "#e2e8f0",
+                                      border: "1px solid rgba(255,255,255,0.05)",
+                                      "&:hover": {
+                                          bgcolor: "rgba(167, 139, 250, 0.2)",
+                                          color: "#fff",
+                                          borderColor: "rgba(167, 139, 250, 0.4)"
+                                      },
+                                      transition: "all 0.2s"
+                                  }}
+                                >
+                                    {intern.name}
+                                </Chip>
+                            </Tooltip>
+                         ))}
+                      </Box>
                     )}
                   </Box>
-                </ListItemContent>
-              </ListItem>
-            ))}
-          </List>
-        )}
-      </Box>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </Box>
 
-      {/* Approve confirmation dialog */}
-      <Modal open={approveDialog.open} onClose={() => setApproveDialog({ open: false, user: null })}>
-        <ModalDialog>
-          <DialogTitle>Confirm Approval</DialogTitle>
-          <DialogContent>
-            {approveDialog.user && (
-              <>
-                <Typography>
-                  Are you sure you want to approve user <b>{approveDialog.user.name}</b> as <b>{pendingRole[approveDialog.user._id]}</b>
-                  {pendingRole[approveDialog.user._id] === "intern" &&
-                    pendingSupervisor[approveDialog.user._id]
-                      ? <>
-                          {" "}under supervisor{" "}
-                          <b>
-                            {supervisors.find((s) => String(s._id) === String(pendingSupervisor[approveDialog.user._id]))?.name}
-                          </b>
-                        </>
-                      : ""}
-                  ?
+        {/* Approve Dialog */}
+        <Modal open={approveDialog.open} onClose={() => setApproveDialog({ open: false, user: null })}>
+          <ModalDialog variant="outlined" sx={{ bgcolor: "#18181b", borderColor: "rgba(255,255,255,0.2)", color: "#fff", boxShadow: "lg" }}>
+            <DialogTitle sx={{ color: "#fff", fontSize: "1.25rem" }}>Confirm Approval</DialogTitle>
+            <DialogContent sx={{ color: "#a1a1aa" }}>
+              {approveDialog.user && (
+                <Typography sx={{ color: "#a1a1aa" }}>
+                  Approve <b>{approveDialog.user.name}</b> as <span style={{ color: "#a78bfa", fontWeight: 600 }}>{pendingRole[approveDialog.user._id]}</span>
+                  {pendingRole[approveDialog.user._id] === "intern" && pendingSupervisor[approveDialog.user._id] ? (
+                    <> under supervisor <span style={{ color: "#fff", fontWeight: 600 }}>{supervisors.find((s) => String(s._id) === String(pendingSupervisor[approveDialog.user._id]))?.name}</span></>
+                  ) : "?"}
                 </Typography>
-              </>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button
-              variant="plain"
-              startDecorator={<CloseIcon />}
-              onClick={() => setApproveDialog({ open: false, user: null })}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="success"
-              variant="solid"
-              startDecorator={<CheckCircleIcon />}
-              onClick={() => approveDialog.user && handleApprove(approveDialog.user._id)}
-            >
-              Approve
-            </Button>
-          </DialogActions>
-        </ModalDialog>
-      </Modal>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button variant="plain" color="neutral" onClick={() => setApproveDialog({ open: false, user: null })} sx={{ color: "#a1a1aa", "&:hover": { color: "#f87171", bgcolor: "rgba(248, 113, 113, 0.1)" } }}>
+                Cancel
+              </Button>
+              <Button variant="solid" color="success" onClick={() => approveDialog.user && handleApprove(approveDialog.user._id)} sx={{ bgcolor: "#22c55e", "&:hover": { bgcolor: "#16a34a" } }}>
+                Confirm
+              </Button>
+            </DialogActions>
+          </ModalDialog>
+        </Modal>
+      </Box>
     </Sheet>
   );
 }

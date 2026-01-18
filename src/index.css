@@ -1,1 +1,23 @@
 @import "tailwindcss";
+
+:root {
+    color-scheme: dark;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #09090b 0%, #1a1a2e 50%, #2e1065 100%);
+    background-attachment: fixed;
+    color: #e2e8f0;
+    /* Slate-200: Default text color */
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}

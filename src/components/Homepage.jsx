@@ -5,23 +5,17 @@ import {
   Typography,
   Button,
   Sheet,
-  List,
-  ListItem,
-  ListItemDecorator,
-  Divider,
   Chip,
   Card,
-  CardContent,
 } from "@mui/joy";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
-import GroupsIcon from "@mui/icons-material/Groups";
-import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import FactCheckIcon from "@mui/icons-material/FactCheck";
 import LoginIcon from "@mui/icons-material/Login";
 import AppRegistrationIcon from "@mui/icons-material/AppRegistration";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SecurityIcon from "@mui/icons-material/Security";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import HomeIcon from "@mui/icons-material/Home";
+import supInternLogo from "../assets/supInternLOGO.png";
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -30,12 +24,12 @@ export default function HomePage() {
     <Sheet
       sx={{
         minHeight: "100vh",
-        // New: login page style gradient background
-        background: "linear-gradient(to right, #a78bfa 0%, #3b82f6 100%)",
+        background: "linear-gradient(135deg, #09090b 0%, #1a1a2e 50%, #2e1065 100%)", // Deep black to purple
         px: 0,
         py: 0,
         display: "flex",
         flexDirection: "column",
+        color: "#fff",
       }}
     >
       {/* Topbar with Login/Signup */}
@@ -44,68 +38,97 @@ export default function HomePage() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          px: 4,
-          py: 2,
-          bgcolor: "rgba(255,255,255,0.10)",
-          borderBottom: "1.5px solid rgba(255,255,255,0.16)",
-          boxShadow: "sm",
+          px: { xs: 2, md: 6 },
+          py: 2.5,
+          bgcolor: "rgba(0,0,0,0.4)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
           position: "sticky",
           top: 0,
           zIndex: 100,
         }}
       >
-        <Typography
-          level="h6"
-          component="div"
-          sx={{
-            fontWeight: 700,
-            color: "#fff",
-            letterSpacing: ".01em",
-            cursor: "pointer",
-          }}
+        <Box
           onClick={() => navigate("/")}
+          sx={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}
+        >
+          {/* <Box
+            sx={{
+              p: 1,
+              bgcolor: "rgba(124, 58, 237, 0.2)",
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              transition: "transform 0.2s",
+              "&:hover": { transform: "scale(1.05)" }
+            }}
+          >
+             <HomeIcon sx={{ color: "#a78bfa", fontSize: 24 }} />
+          </Box> */}
+          <Typography
+            level="h4"
+            sx={{
+              fontWeight: 800,
+              color: "#fff",
+              fontFamily: "'Inter', sans-serif",
+              fontSize: "1.5rem",
+              background: "linear-gradient(45deg, #fff, #a78bfa)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              letterSpacing: "-0.02em"
+            }}
           >
             SupIntern
           </Typography>
-          <Box>
-         <Button
-            variant="solid"
-            color="primary"
+        </Box>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            variant="plain"
+            sx={{
+              fontWeight: 600,
+              color: "#e2e8f0",
+              "&:hover": { color: "#a78bfa", bgcolor: "rgba(255,255,255,0.05)" },
+            }}
+            onClick={() => navigate("/about")}
+          >
+            About
+          </Button>
+          <Button
+            variant="outlined"
             size="md"
             startDecorator={<LoginIcon />}
             sx={{
-              mr: 2,
               fontWeight: 600,
-              bgcolor: "#fff",
-              color: "#3b82f6",
-              border: "1.5px solid #3b82f6",
+              color: "#e2e8f0",
+              borderColor: "rgba(255,255,255,0.2)",
               "&:hover": {
-                bgcolor: "#e0e7ff",
+                bgcolor: "rgba(167, 139, 250, 0.1)",
+                borderColor: "#a78bfa",
+                color: "#fff",
               },
             }}
             onClick={() => navigate("/login")}
           >
             Login
           </Button>
-        <Button
-          variant="solid"
-          color="primary"
-          size="md"
-          startDecorator={<AppRegistrationIcon />}
-          sx={{
-              
+          <Button
+            variant="solid"
+            size="md"
+            startDecorator={<AppRegistrationIcon />}
+            sx={{
               fontWeight: 600,
-              bgcolor: "#fff",
-              color: "#3b82f6",
-              border: "1.5px solid #3b82f6",
+              bgcolor: "#7c3aed", // Violet-600
+              color: "#fff",
               "&:hover": {
-                bgcolor: "#e0e7ff",
+                bgcolor: "#6d28d9", // Violet-700
+                color: "#fff",
               },
             }}
-          onClick={() => navigate("/signup")}
-        >
-          Sign Up
-        </Button>
+            onClick={() => navigate("/signup")}
+          >
+            Sign Up
+          </Button>
         </Box>
       </Box>
 
@@ -114,339 +137,206 @@ export default function HomePage() {
         sx={{
           flex: 1,
           display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "center",
+          alignItems: "center",
+          justifyContent: "flex-start",
           flexDirection: "column",
-          px: { xs: 1, md: 3 },
-          py: { xs: 2, md: 6 },
-          minHeight: 550,
-          // Remove: previous gradient, since body already has it
+          px: { xs: 2, md: 4 },
+          pt: { xs: 4, md: 6   },
+          pb: { xs: 6, md: 10 },
         }}
       >
         <Box
           sx={{
             width: "100%",
-            maxWidth: 760,
-            bgcolor: "rgba(255,255,255,0.90)",
-            borderRadius: "2xl",
-            boxShadow: "xl",
-            p: { xs: 3, md: 6 },
-            mx: "auto",
-            mt: { xs: 4, md: 4 },
-            mb: { xs: 2, md: 4 },
+            maxWidth: 900,
+            textAlign: "center",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            backdropFilter: "blur(10px)",
-            border: "1.5px solid #e0e7ff",
           }}
         >
           <Chip
-            color="primary"
-            variant="soft"
-            size="lg"
-            startDecorator={<EmojiEventsIcon />}
+            variant="outlined"
+            size="md"
+            startDecorator={<EmojiEventsIcon sx={{ color: "#fbbf24" }} />}
             sx={{
-              fontWeight: 700,
-              fontSize: "1.15rem",
-              mb: 2,
-              px: 2.5,
-              letterSpacing: ".03em",
-              bgcolor: "primary.100",
-              color: "primary.800",
-              boxShadow: "sm",
+              mb: 3,
+              px: 2,
+              py: 0.5,
+              fontSize: "0.95rem",
+              fontWeight: 600,
+              borderRadius: "xl",
+              color: "#e2e8f0",
+              borderColor: "rgba(167, 139, 250, 0.3)",
+              bgcolor: "rgba(167, 139, 250, 0.1)",
             }}
           >
-            Productivity. Transparency. Growth.
+            The Future of Internship Management
           </Chip>
+
+          <Box
+            component="img"
+            src={supInternLogo}
+            alt="SupIntern Logo"
+            sx={{
+              maxWidth: "600px",
+              width: "auto",
+              height: "auto",
+              maxHeight: "150px", // Reasonable visual limit while allowing "actual size" feel
+              mb: 0,
+              mixBlendMode: "screen", // Ensures text stands out if there's a black background
+              transition: "transform 0.3s ease",
+              "&:hover": {
+                  transform: "scale(1.05)"
+              }
+            }}
+          />
+
           <Typography
             level="h1"
-            fontWeight="xl"
             sx={{
               mb: 2,
-              color: "primary.900",
-              textAlign: "center",
-              letterSpacing: "0.03em",
-              fontSize: { xs: "2.2rem", md: "2.8rem" },
+              color: "#fff",
+              fontSize: { xs: "2.5rem", md: "4.5rem" },
+              fontWeight: 900,
               lineHeight: 1.1,
-              textShadow: "0 1px 12px #e3ebfc",
-              fontFamily: "inherit",
+              letterSpacing: "-0.02em",
             }}
           >
-            <span style={{ color: "#3b82f6" }}>Intern Task Tracker</span>
-            <br />
-            <span style={{ fontWeight: 400, color: "#4c51bf" }}>
-              Track. Manage. Succeed.
+            Elevate Your <br />
+            <span
+              style={{
+                background: "linear-gradient(to right, #c084fc, #6366f1)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              Internship Program
             </span>
           </Typography>
+
           <Typography
             level="body-lg"
             sx={{
-              mb: 3,
-              color: "neutral.700",
-              textAlign: "center",
-              fontSize: { xs: "1.08rem", md: "1.18rem" },
-              maxWidth: 600,
+              mb: 5,
+              color: "#94a3b8", // Slate-400
+              fontSize: { xs: "1.1rem", md: "1.35rem" },
+              maxWidth: 700,
+              lineHeight: 1.6,
             }}
           >
-            Empowering organizations to seamlessly monitor, manage, and maximize intern productivity with a modern, collaborative platform for interns, supervisors, and admins.
+            SupIntern is the all-in-one platform for effortless task tracking, supervisor approvals, and team transparency. Built for modern organizations.
           </Typography>
 
           {/* CTA Buttons */}
-          <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 3 }}>
+          <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: 3, mb: 8 }}>
             <Button
-              variant="solid"
-              color="primary"
               size="lg"
               onClick={() => navigate("/signup")}
               sx={{
-                minWidth: 130,
-                fontWeight: 700,
+                px: 5,
+                py: 1.5,
                 fontSize: "1.1rem",
-                boxShadow: "md",
-                letterSpacing: ".01em",
-                bgcolor: "#3b82f6",
-                color: "#fff",
+                borderRadius: "lg",
+                bgcolor: "#fff",
+                color: "#000",
+                fontWeight: 700,
                 "&:hover": {
-                  bgcolor: "#2563eb",
+                  bgcolor: "#f1f5f9",
+                  transform: "translateY(-2px)",
+                  color: "#000",
                 },
+                transition: "all 0.2s",
               }}
               startDecorator={<AppRegistrationIcon />}
             >
-              Get Started
+              Get Started Free
             </Button>
             <Button
-              variant="soft"
-              color="primary"
+              variant="outlined"
               size="lg"
               onClick={() => navigate("/login")}
               sx={{
-                minWidth: 130,
-                fontWeight: 700,
+                px: 5,
+                py: 1.5,
                 fontSize: "1.1rem",
-                letterSpacing: ".01em",
-                bgcolor: "rgba(55, 65, 81, 0.08)",
-                color: "#3b82f6",
+                borderRadius: "lg",
+                color: "#fff",
+                borderColor: "rgba(255,255,255,0.3)",
+                fontWeight: 600,
                 "&:hover": {
-                  bgcolor: "rgba(55, 65, 81, 0.13)",
+                  bgcolor: "rgba(167, 139, 250, 0.15)", // Purple tint
+                  borderColor: "#a78bfa",
+                  color: "#fff",
                 },
               }}
               startDecorator={<LoginIcon />}
             >
-              Login
+              Existing User
             </Button>
           </Box>
 
-          <Divider sx={{ mb: 3, width: "100%" }} />
-
-          {/* Features Section */}
-          <Typography
-            level="h4"
+          {/* Value Props Row */}
+          <Box
             sx={{
-              color: "#4c51bf",
-              fontWeight: 600,
-              mb: 1,
-              textAlign: "center",
-              letterSpacing: ".01em",
-            }}
-          >
-            Key Features
-          </Typography>
-          <List
-            sx={{
-              "--List-gap": "1.2rem",
-              "--ListItem-radius": "8px",
-              "--ListItem-paddingY": "0.4rem",
-              "--ListItemDecorator-size": "2.1rem",
-              mb: 2,
-              px: 1,
-            }}
-          >
-            <ListItem>
-              <ListItemDecorator>
-                <AssignmentTurnedInIcon color="primary" fontSize="large" />
-              </ListItemDecorator>
-              <Typography level="body-lg">
-                <b>Interns:</b> Effortlessly log daily tasks, track hours, and update progress with ease.
-              </Typography>
-            </ListItem>
-            <ListItem>
-              <ListItemDecorator>
-                <SupervisorAccountIcon color="success" fontSize="large" />
-              </ListItemDecorator>
-              <Typography level="body-lg">
-                <b>Supervisors:</b> Review, verify, and download intern reports. Monitor timelines with clarity.
-              </Typography>
-            </ListItem>
-            <ListItem>
-              <ListItemDecorator>
-                <FactCheckIcon color="warning" fontSize="large" />
-              </ListItemDecorator>
-              <Typography level="body-lg">
-                <b>Admins:</b> Seamlessly approve users, assign supervisors, and maintain workflow control.
-              </Typography>
-            </ListItem>
-            <ListItem>
-              <ListItemDecorator>
-                <GroupsIcon color="info" fontSize="large" />
-              </ListItemDecorator>
-              <Typography level="body-lg">
-                <b>Collaboration:</b> Foster transparency, real-time updates, and effective teamwork.
-              </Typography>
-            </ListItem>
-            <ListItem>
-              <ListItemDecorator>
-                <SecurityIcon sx={{ color: "#a05fe6" }} fontSize="large" />
-              </ListItemDecorator>
-              <Typography level="body-lg">
-                <b>Data Security:</b> Your information is safe, private, and always protected.
-              </Typography>
-            </ListItem>
-            <ListItem>
-              <ListItemDecorator>
-                <CheckCircleIcon sx={{ color: "#43a047" }} fontSize="large" />
-              </ListItemDecorator>
-              <Typography level="body-lg">
-                <b>Intuitive Interface:</b> Clean, responsive design for all user roles.
-              </Typography>
-            </ListItem>
-          </List>
-        </Box>
-
-        {/* Value Proposition Cards with Blur */}
-        <Box
-          sx={{
-            mt: { xs: 3, md: 5 },
-            width: "100%",
-            display: "flex",
-            flexWrap: "wrap",
-            gap: { xs: 2, md: 4 },
-            justifyContent: "center",
-            zIndex: 1,
-          }}
-        >
-          <Card
-            variant="soft"
-            sx={{
-              minWidth: 180,
-              maxWidth: 260,
-              minHeight: 110,
-              p: 2.5,
-              borderRadius: "2xl",
-              bgcolor: "rgba(255,255,255,0.80)",
-              boxShadow: "lg",
-              backdropFilter: "blur(16px)",
-              border: "1.5px solid #e3e8f3",
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              transition: "box-shadow 0.2s, transform 0.2s",
-              "&:hover": {
-                boxShadow: "xl",
-                transform: "translateY(-4px) scale(1.04)",
-              },
+              flexWrap: "wrap",
+              gap: 4,
+              width: "100%",
+              justifyContent: "center",
             }}
           >
-            <CardContent sx={{ textAlign: "center", p: 0 }}>
-              <Typography
-                level="title-lg"
-                color="primary"
-                fontWeight={700}
-                sx={{ mb: 0.5, letterSpacing: ".01em" }}
+            {[
+              { title: "Streamlined Workflow", desc: "Instantly log and verify daily tasks.", icon: <AssignmentTurnedInIcon sx={{ fontSize: 32, color: "#a78bfa" }} /> },
+              { title: "Real-time Analytics", desc: "Supervisors get instant insights.", icon: <FactCheckIcon sx={{ fontSize: 32, color: "#60a5fa" }} /> },
+              { title: "Enterprise Security", desc: "Data protection you can trust.", icon: <SecurityIcon sx={{ fontSize: 32, color: "#34d399" }} /> },
+            ].map((item, index) => (
+              <Card
+                key={index}
+                variant="outlined"
+                sx={{
+                  width: 280,
+                  p: 3,
+                  bgcolor: "rgba(255,255,255,0.03)",
+                  borderColor: "rgba(255,255,255,0.1)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: "xl",
+                  transition: "all 0.3s",
+                  "&:hover": {
+                    transform: "translateY(-5px)",
+                    borderColor: "rgba(167, 139, 250, 0.5)",
+                    boxShadow: "0 10px 40px -10px rgba(124, 58, 237, 0.3)",
+                  },
+                }}
               >
-                Simple & Fast
-              </Typography>
-              <Typography level="body-md" color="neutral">
-                Log, monitor, and verify in seconds.
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            variant="soft"
-            sx={{
-              minWidth: 180,
-              maxWidth: 260,
-              minHeight: 110,
-              p: 2.5,
-              borderRadius: "2xl",
-              bgcolor: "rgba(243,255,243,0.80)",
-              boxShadow: "lg",
-              backdropFilter: "blur(16px)",
-              border: "1.5px solid #e3f1e8",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              transition: "box-shadow 0.2s, transform 0.2s",
-              "&:hover": {
-                boxShadow: "xl",
-                transform: "translateY(-4px) scale(1.04)",
-              },
-            }}
-          >
-            <CardContent sx={{ textAlign: "center", p: 0 }}>
-              <Typography
-                level="title-lg"
-                color="success"
-                fontWeight={700}
-                sx={{ mb: 0.5, letterSpacing: ".01em" }}
-              >
-                Collaborative
-              </Typography>
-              <Typography level="body-md" color="neutral">
-                Built for teams at every level.
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            variant="soft"
-            sx={{
-              minWidth: 180,
-              maxWidth: 260,
-              minHeight: 110,
-              p: 2.5,
-              borderRadius: "2xl",
-              bgcolor: "rgba(255,251,240,0.80)",
-              boxShadow: "lg",
-              backdropFilter: "blur(16px)",
-              border: "1.5px solid #f3eedc",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              transition: "box-shadow 0.2s, transform 0.2s",
-              "&:hover": {
-                boxShadow: "xl",
-                transform: "translateY(-4px) scale(1.04)",
-              },
-            }}
-          >
-            <CardContent sx={{ textAlign: "center", p: 0 }}>
-              <Typography
-                level="title-lg"
-                color="warning"
-                fontWeight={700}
-                sx={{ mb: 0.5, letterSpacing: ".01em" }}
-              >
-                Transparent
-              </Typography>
-              <Typography level="body-md" color="neutral">
-                Every action is tracked and clear.
-              </Typography>
-            </CardContent>
-          </Card>
+                <Box sx={{ mb: 2 }}>{item.icon}</Box>
+                <Typography level="h4" sx={{ color: "#fff", mb: 1, fontWeight: 700 }}>
+                  {item.title}
+                </Typography>
+                <Typography level="body-md" sx={{ color: "#94a3b8" }}>
+                  {item.desc}
+                </Typography>
+              </Card>
+            ))}
+          </Box>
         </Box>
       </Box>
+
+      {/* Footer */}
       <Box
         sx={{
-          py: 2.5,
+          py: 3,
           textAlign: "center",
-          fontSize: "1rem",
-          color: "neutral.100",
-          borderTop: "1.5px solid rgba(255,255,255,0.16)",
-          backgroundColor: "transparent",
-          letterSpacing: ".01em",
+          borderTop: "1px solid rgba(255,255,255,0.08)",
+          bgcolor: "rgba(0,0,0,0.2)",
         }}
       >
-        &copy; {new Date().getFullYear()} Intern Task Tracker. All rights reserved.
+        <Typography level="body-sm" sx={{ color: "#64748b" }}>
+          &copy; {new Date().getFullYear()} SupIntern. Built for excellence.
+        </Typography>
+        <Typography level="body-xs" sx={{ color: "#475569", mt: 1 }}>
+          Developed by <a href="https://github.com/RockingAyush04" target="_blank" rel="noopener noreferrer" style={{ color: "#64748b", textDecoration: "none" }}>Ayush Padhy</a>
+        </Typography>
       </Box>
     </Sheet>
   );

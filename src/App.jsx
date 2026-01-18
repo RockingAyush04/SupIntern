@@ -8,6 +8,7 @@ import SignupPage from "./components/SignupPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import HomePage from "./components/Homepage";
+import AboutPage from "./components/AboutPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route element={<Navbar />} >
           <Route
             path="/intern"

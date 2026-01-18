@@ -1,83 +1,59 @@
 # SupIntern
 
-SupIntern is a full-stack web application designed to streamline internship management for organizations. It enables admins to onboard users, supervisors to manage interns, and interns to log and track their daily tasks efficiently.
+SupIntern is a MERN-stack web application designed to streamline internship management for organizations. It enables admins to onboard users, supervisors to manage interns, and interns to log and track their daily tasks efficiently.
 
 ---
 
 ## 🚀 Features
 
 - **User Authentication:** Secure signup/login for admins, supervisors, and interns.
-- **Role Management:** Admin can review, approve, and assign roles to users.
-- **Supervisor Dashboard:** View and manage assigned interns, view their tasks, download task reports.
+- **Role Management:** Admin can review, approve, and assign roles (Intern, Supervisor) to users.
+- **Supervisor Dashboard:** View and manage assigned interns, view their tasks, download task reports (CSV).
 - **Intern Dashboard:** Submit daily tasks, view/edit/delete past entries.
-- **Task Management:** CRUD operations on tasks (create, read, update, delete).
-- **CSV Export:** Supervisors can export intern task reports as CSV files.
-- **Responsive UI:** Built with Material UI Joy for a clean and modern look.
+- **Task Management:** Full CRUD operations on tasks.
+- **Data Export:** Supervisors can export intern task reports as CSV files.
+- **Responsive UI:** Built with React and Material UI Joy for a clean, modern look.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### **Frontend**
-- **React** (with hooks)
-- **Material UI Joy** (component library)
-- **Axios** (API requests)
+- **React** (Vite)
+- **Material UI Joy** (Component Library)
+- **React Router DOM** (Navigation)
+- **Context API** (State Management)
 
 ### **Backend**
-- **Node.js** with **Express.js**
-- **PostgreSQL** (hosted on [Neon](https://neon.tech/))
-- **pg** (Node PostgreSQL client)
-- **bcryptjs** (password hashing)
-- **dotenv** (environment variable management)
-- **CORS** (cross-origin resource sharing)
+- **Node.js** & **Express.js**
+- **MongoDB** (Database)
+- **Mongoose** (ODM)
+- **bcryptjs** (Authentication)
+- **cors** & **dotenv** (Utilities)
 
 ### **Deployment**
-- **Frontend:** Vercel/Netlify/Render (static hosting)
-- **Backend:** Render/Railway/Fly.io (Node.js hosting)
-- **Database:** Neon (cloud Postgres)
+- **Frontend:** Vercel
+- **Backend:** Render
+- **Database:** MongoDB Atlas
 
 ---
 
-## 🗃️ Database Structure
+## 🗃️ Database Models (Mongoose)
 
-### **users**
-| Column        | Type           | Description                               |
-|---------------|----------------|-------------------------------------------|
-| id            | SERIAL PRIMARY | Unique user ID                            |
-| name          | VARCHAR        | User's full name                          |
-| email         | VARCHAR UNIQUE | User's email                              |
-| password      | VARCHAR        | Hashed password                           |
-| role          | VARCHAR        | 'admin', 'supervisor', or 'intern'        |
-| status        | VARCHAR        | 'pending', 'active', 'approved', etc.     |
-| supervisor_id | INTEGER        | (For interns) references users(id)        |
-| created_at    | TIMESTAMP      | Timestamp of registration                 |
+### **User**
+- `name`: String
+- `email`: String (Unique)
+- `password`: String (Hashed)
+- `role`: 'intern' | 'supervisor' | 'admin'
+- `status`: 'pending' | 'active'
+- `supervisor_id`: ObjectId (Ref: User)
 
-### **tasks**
-| Column        | Type           | Description                      |
-|---------------|----------------|----------------------------------|
-| id            | SERIAL PRIMARY | Unique task ID                   |
-| user_id       | INTEGER        | References users(id)             |
-| date          | DATE           | Date of the task entry           |
-| task          | VARCHAR        | Short task title                 |
-| hours         | INTEGER        | Hours spent                      |
-| description   | TEXT           | Detailed description             |
-| created_at    | TIMESTAMP      | When the task was logged         |
-
----
-
-## 📐 Application Architecture
-
-```
-Frontend (React)
-    |
-    | REST API (fetch, axios)
-    v
-Backend (Express.js)
-    |
-    | pg (PostgreSQL client)
-    v
-Database (Neon PostgreSQL)
-```
+### **Task**
+- `user_id`: ObjectId (Ref: User)
+- `date`: String (ISO Date)
+- `task`: String
+- `hours`: Number
+- `description`: String
 
 ---
 
@@ -85,68 +61,75 @@ Database (Neon PostgreSQL)
 
 ### **1. Clone the Repository**
 ```bash
-git clone https://github.com/yourusername/supintern.git
-cd supintern
+git clone https://github.com/RockingAyush04/SupIntern.git
+cd SupIntern
 ```
 
-### **2. Setup Backend**
+### **2. Setup Environment Variables**
+Create a `.env` file in the root directory:
+```env
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/supintern?retryWrites=true&w=majority
+PORT=4000
+```
+For the frontend (if deploying separately), you may also need `VITE_API_URL` if not running locally. Locally it defaults to `http://localhost:4000`.
 
-- Go to `backend/`
-- Create a `.env` file with:
-  ```
-  DATABASE_URL=postgresql://<user>:<password>@<host>/<dbname>?sslmode=require
-  PORT=4000
-  ```
-- Install dependencies:
-  ```bash
-  npm install
-  ```
-- Start server:
-  ```bash
-  npm start
-  ```
+### **3. Install Dependencies**
+```bash
+npm install
+```
 
-### **3. Setup Frontend**
-
-- Go to `frontend/`
-- Install dependencies:
-  ```bash
-  npm install
-  ```
-- Configure API base URL in `.env` (e.g., `REACT_APP_API_URL=https://your-backend-url.com`)
-- Start client:
-  ```bash
-  npm start
-  ```
+### **4. Start the Application**
+Run both Frontend and Backend concurrently:
+```bash
+npm run dev
+```
+- Frontend: `http://localhost:5173`
+- Backend: `http://localhost:4000`
 
 ---
 
-## 🏗️ Deployment
+## 🏗️ Deployment Guides
 
-- **Backend:** Deploy to Render/Railway/Fly.io. Set `DATABASE_URL` as env variable.
-- **Frontend:** Deploy to Vercel/Netlify/Render. Point API calls to deployed backend.
-- **Database:** Tables created and seeded on Neon dashboard.
+### **Backend (Render)**
+1. Connect GitHub repo to Render.
+2. Build Command: `npm install`
+3. Start Command: `node server.js`
+4. Add Environment Variables: `MONGODB_URI`.
+5. **Important:** Ensure MongoDB Atlas Network Access is set to allow any IP (`0.0.0.0/0`) since Render IPs are dynamic.
+
+### **Frontend (Vercel)**
+1. Connect GitHub repo to Vercel.
+2. Framework Preset: **Vite**.
+3. Add Environment Variable:
+   - `VITE_API_URL`: `https://your-backend-app.onrender.com` (Your deployed Render backend URL).
 
 ---
 
-## 👥 User Roles
+## 👥 User Roles & Workflow
 
-- **Admin:** Approves new users, assigns roles, can see all users.
-- **Supervisor:** Manages assigned interns, reviews and exports their tasks.
-- **Intern:** Submits and manages their own daily tasks.
+1. **New User Signup:** User signs up and is set to `Pending` status.
+2. **Admin Approval:**
+   - Admin logs in.
+   - Assigns a **Role** (Intern/Supervisor).
+   - If User is an **Intern**, Admin assigns a **Supervisor**.
+   - Admin approves the user.
+3. **Supervisor Flow:**
+   - Logs in to see assigned Interns.
+   - Views tasks logged by interns.
+4. **Intern Flow:**
+   - Logs daily tasks (Date, Task, Hours, Description).
+   - Can Edit/Delete their own tasks.
 
 ---
 
-## 🔒 Security Notes
+## 🔒 Security
 
-- Passwords are hashed with bcrypt before storage.
-- All sensitive data (like DB credentials) is stored in `.env` files and environment variables.
-- CORS is enabled on backend for secure API access.
+- Passwords are hashed using `bcryptjs`.
+- Frontend uses filtered API responses (passwords excluded).
+- CORS policies configured for security.
 
 ---
 
 ## 📄 License
 
 MIT
-
----
