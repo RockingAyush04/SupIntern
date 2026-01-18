@@ -9,10 +9,7 @@ You have two parts to deploy:
 3.  **Database**: Already on **MongoDB Atlas** (Cloud).
 
 ## Step 1: Prepare for Deployment
-We need to replace the hardcoded `http://localhost:4000` with an environment variable so it works both locally and in production.
-
-### Action Item
-I will refactor `src/context/AuthContext.jsx` to use `import.meta.env.VITE_API_URL`.
+We HAVE replaced the hardcoded `http://localhost:4000` with an environment variable so it works both locally and in production.
 
 ## Step 2: Deploy Backend (Render)
 1.  Push your code to **GitHub**.
@@ -27,6 +24,15 @@ I will refactor `src/context/AuthContext.jsx` to use `import.meta.env.VITE_API_U
         *   `PORT`: `4000` (or leave default, Render sets its own)
 6.  Click **Create Web Service**.
 7.  Copy the **URL** Render gives you (e.g., `https://supintern-backend.onrender.com`).
+
+### ⚠️ IMPORTANT: Fix MongoDB Connection Error
+If you see a **MongoDB Connection Error** (Not Whitelisted), do this:
+1.  Go to **MongoDB Atlas**.
+2.  Click **Network Access** (left sidebar).
+3.  Click **+ Add IP Address**.
+4.  Click **Allow Access from Anywhere** (`0.0.0.0/0`).
+5.  Click **Confirm**.
+*(Render servers have dynamic IPs, so you must allow all IPs).*
 
 ## Step 3: Deploy Frontend (Vercel)
 1.  Go to [Vercel.com](https://vercel.com) and sign up.

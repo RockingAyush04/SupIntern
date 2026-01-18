@@ -71,7 +71,7 @@ function AdminPage() {
   const supervisorsWithInterns = supervisors.map((sup) => ({
     ...sup,
     interns: allUsers.filter(
-      (u) => u.role === "intern" && String(u.supervisor_id) === String(sup.id) && u.status === "active"
+      (u) => u.role === "intern" && String(u.supervisor_id) === String(sup._id) && u.status === "active"
     ),
   }));
 
@@ -124,7 +124,7 @@ function AdminPage() {
             </thead>
             <tbody>
               {pendingUsers.map((u) => (
-                <tr key={u.id}>
+                <tr key={u._id}>
                   <td>
                     <Typography fontWeight="md">{u.name}</Typography>
                   </td>
@@ -133,9 +133,9 @@ function AdminPage() {
                     <Select
                       size="sm"
                       placeholder="Role"
-                      value={pendingRole[u.id] || ""}
+                      value={pendingRole[u._id] || ""}
                       onChange={(_, value) =>
-                        setPendingRole((prev) => ({ ...prev, [u.id]: value }))
+                        setPendingRole((prev) => ({ ...prev, [u._id]: value }))
                       }
                       sx={{ minWidth: 120 }}
                     >
@@ -144,15 +144,15 @@ function AdminPage() {
                     </Select>
                   </td>
                   <td>
-                    {pendingRole[u.id] === "intern" ? (
+                    {pendingRole[u._id] === "intern" ? (
                       <Select
                         size="sm"
                         placeholder="Supervisor"
-                        value={pendingSupervisor[u.id] || ""}
+                        value={pendingSupervisor[u._id] || ""}
                         onChange={(_, value) =>
                           setPendingSupervisor((prev) => ({
                             ...prev,
-                            [u.id]: value,
+                            [u._id]: value,
                           }))
                         }
                         sx={{ minWidth: 160 }}
@@ -161,7 +161,7 @@ function AdminPage() {
                           <Option disabled>No supervisors</Option>
                         ) : (
                           supervisors.map((sup) => (
-                            <Option key={sup.id} value={sup.id}>
+                            <Option key={sup._id} value={sup._id}>
                               {sup.name} ({sup.email})
                             </Option>
                           ))
@@ -181,8 +181,8 @@ function AdminPage() {
                           color="success"
                           variant="soft"
                           disabled={
-                            !pendingRole[u.id] ||
-                            (pendingRole[u.id] === "intern" && !pendingSupervisor[u.id])
+                            !pendingRole[u._id] ||
+                            (pendingRole[u._id] === "intern" && !pendingSupervisor[u._id])
                           }
                           onClick={() => setApproveDialog({ open: true, user: u })}
                         >
@@ -220,7 +220,7 @@ function AdminPage() {
           >
             {supervisorsWithInterns.map((sup) => (
               <ListItem
-                key={sup.id}
+                key={sup._id}
                 sx={{
                   display: "flex",
                   alignItems: "flex-start",
@@ -253,7 +253,7 @@ function AdminPage() {
                     ) : (
                       <ul style={{ margin: 0, padding: 0, listStyle: "disc inside" }}>
                         {sup.interns.map((intern) => (
-                          <li key={intern.id}>
+                          <li key={intern._id}>
                             <Typography level="body-sm" sx={{ display: "inline" }}>{intern.name} ({intern.email})</Typography>
                           </li>
                         ))}
@@ -275,13 +275,13 @@ function AdminPage() {
             {approveDialog.user && (
               <>
                 <Typography>
-                  Are you sure you want to approve user <b>{approveDialog.user.name}</b> as <b>{pendingRole[approveDialog.user.id]}</b>
-                  {pendingRole[approveDialog.user.id] === "intern" &&
-                    pendingSupervisor[approveDialog.user.id]
+                  Are you sure you want to approve user <b>{approveDialog.user.name}</b> as <b>{pendingRole[approveDialog.user._id]}</b>
+                  {pendingRole[approveDialog.user._id] === "intern" &&
+                    pendingSupervisor[approveDialog.user._id]
                       ? <>
                           {" "}under supervisor{" "}
                           <b>
-                            {supervisors.find((s) => String(s.id) === String(pendingSupervisor[approveDialog.user.id]))?.name}
+                            {supervisors.find((s) => String(s._id) === String(pendingSupervisor[approveDialog.user._id]))?.name}
                           </b>
                         </>
                       : ""}
@@ -302,7 +302,7 @@ function AdminPage() {
               color="success"
               variant="solid"
               startDecorator={<CheckCircleIcon />}
-              onClick={() => approveDialog.user && handleApprove(approveDialog.user.id)}
+              onClick={() => approveDialog.user && handleApprove(approveDialog.user._id)}
             >
               Approve
             </Button>

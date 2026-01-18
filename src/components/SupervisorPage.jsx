@@ -82,8 +82,8 @@ function SupervisorPage() {
       // Fetch task counts for each intern
       const counts = {};
       for (const intern of interns) {
-        const tasks = await getTasksForUser(intern.id);
-        counts[intern.id] = tasks.length;
+        const tasks = await getTasksForUser(intern._id);
+        counts[intern._id] = tasks.length;
       }
       setTaskCounts(counts);
     }
@@ -92,7 +92,7 @@ function SupervisorPage() {
 
   const handleViewIntern = async (intern) => {
     setSelectedIntern(intern);
-    const data = await getTasksForUser(intern.id);
+    const data = await getTasksForUser(intern._id);
     setSelectedInternTasks(data);
     setOpen(true);
   };
@@ -144,7 +144,7 @@ function SupervisorPage() {
         >
           {interns.map((intern) => (
             <ListItem
-              key={intern.id}
+              key={intern._id}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -162,9 +162,9 @@ function SupervisorPage() {
                     {intern.email}
                   </Typography>
                   <Chip size="sm" variant="soft" color="primary" sx={{ mt: 0.5 }}>
-                    {taskCounts[intern.id] !== undefined
-                      ? `${taskCounts[intern.id]} ${
-                          taskCounts[intern.id] === 1 ? "Task" : "Tasks"
+                    {taskCounts[intern._id] !== undefined
+                      ? `${taskCounts[intern._id]} ${
+                          taskCounts[intern._id] === 1 ? "Task" : "Tasks"
                         }`
                       : "Tasks"}
                   </Chip>
@@ -220,7 +220,7 @@ function SupervisorPage() {
                 </thead>
                 <tbody>
                   {selectedInternTasks.map((task) => (
-                    <tr key={task.id}>
+                    <tr key={task._id}>
                       <td>
                         <Typography level="body-md">
                           {formatDate(task.date)}

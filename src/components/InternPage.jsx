@@ -98,7 +98,7 @@ function InternPage() {
     }
 
     if (editingTask) {
-      await editTask(editingTask.id, {
+      await editTask(editingTask._id, {
         date: form.date,
         task: form.task,
         hours: Number(form.hours),
@@ -204,7 +204,7 @@ function InternPage() {
           </thead>
           <tbody>
             {tasks.map((t) => (
-              <tr key={t.id}>
+              <tr key={t._id}>
                 <td>{t.date ? t.date.slice(0, 10) : ""}</td>
                 <td>{t.task}</td>
                 <td>{t.hours}</td>
@@ -236,7 +236,7 @@ function InternPage() {
                     variant="plain"
                     color="danger"
                     onClick={() => {
-                      setDeleteTaskId(t.id);
+                      setDeleteTaskId(t._id);
                       setDeleteOpen(true);
                     }}
                   >
