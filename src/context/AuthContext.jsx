@@ -34,7 +34,6 @@ export function AuthProvider({ children }) {
       setUser(null);
       return false;
     } catch (err) {
-      console.error("Login Error:", err);
       return { success: false, message: "Network or Server Error" };
     }
   };

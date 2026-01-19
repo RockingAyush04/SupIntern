@@ -46,17 +46,14 @@ function LoginPage() {
   }, [user, navigate]);
 
   const onSubmit = async (data) => {
-    console.log("Login form submitted with data:", { email: data.email, password: "[REDACTED]" }); // Log attempt
     setError("");
     try {
       const result = await login({ email: data.email, password: data.password });
-      console.log("Login result:", result); // Log result
       
       if (!result || (typeof result === 'object' && result?.success === false)) {
          setError(result?.message || "Invalid email or password.");
       }
     } catch (e) {
-      console.error("Unexpected error in LoginPage onSubmit:", e);
       setError("An unexpected error occurred.");
     }
   };
